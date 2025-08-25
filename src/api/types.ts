@@ -58,3 +58,67 @@ export interface ForecastData {
     sunset: number;
   };
 }
+
+// Maritime-specific types
+export interface MarineWeatherData {
+  coord: Coordinates;
+  weather: WeatherCondition[];
+  main: WeatherData["main"];
+  wind: WeatherData["wind"];
+  marine: {
+    wave_height: number;
+    wave_direction: number;
+    wave_period: number;
+    swell_height: number;
+    swell_direction: number;
+    swell_period: number;
+    sea_surface_temperature: number;
+    visibility: number;
+    sea_state: number; // 0-9 scale
+    tide_height: number;
+    current_speed: number;
+    current_direction: number;
+  };
+  sys: WeatherData["sys"];
+  name: string;
+  dt: number;
+}
+
+
+export interface Ship {
+  id: string;
+  name: string;
+  type: 'cargo' | 'tanker' | 'container' | 'passenger' | 'fishing' | 'naval';
+  coordinates: Coordinates;
+  heading: number;
+  speed: number;
+  destination?: string;
+  eta?: string;
+  draft: number;
+  length: number;
+  beam: number;
+}
+
+export interface Route {
+  id: string;
+  name: string;
+  waypoints: Coordinates[];
+  distance: number;
+  estimated_duration: number;
+  weather_risk: 'low' | 'medium' | 'high';
+  fuel_efficiency: number;
+}
+
+export interface MaritimeAlert {
+  id: string;
+  type: 'storm' | 'fog' | 'ice' | 'navigation' | 'security';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  area: {
+    coordinates: Coordinates[];
+  };
+  valid_from: string;
+  valid_until: string;
+  issued_by: string;
+}

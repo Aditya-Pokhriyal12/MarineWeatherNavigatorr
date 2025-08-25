@@ -3,6 +3,11 @@ import {
   useReverseGeocodeQuery,
   useWeatherQuery,
 } from "@/hooks/use-weather";
+import {
+  useMarineWeatherQuery,
+  useMaritimeAlertsQuery,
+  useNearbyShipsQuery,
+} from "@/hooks/use-marine-weather";
 import { CurrentWeather } from "../components/current-weather";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
@@ -13,6 +18,10 @@ import { WeatherForecast } from "../components/weather-forecast";
 import { HourlyTemperature } from "../components/hourly-temprature";
 import WeatherSkeleton from "../components/loading-skeleton";
 import { FavoriteCities } from "@/components/favorite-cities";
+import { MarineWeatherDetails } from "@/components/marine-weather-details";
+import { MaritimeAlerts } from "@/components/maritime-alerts";
+import { NearbyShips } from "@/components/nearby-ships";
+import { RouteOptimizer } from "@/components/route-optimizer";
 
 export function WeatherDashboard() {
   const {
@@ -25,6 +34,11 @@ export function WeatherDashboard() {
   const weatherQuery = useWeatherQuery(coordinates);
   const forecastQuery = useForecastQuery(coordinates);
   const locationQuery = useReverseGeocodeQuery(coordinates);
+  
+  // Marine weather queries
+  const marineWeatherQuery = useMarineWeatherQuery(coordinates);
+  const maritimeAlertsQuery = useMaritimeAlertsQuery(coordinates);
+  const nearbyShipsQuery = useNearbyShipsQuery(coordinates);
 
   // Function to refresh all data
   const handleRefresh = () => {
@@ -33,6 +47,9 @@ export function WeatherDashboard() {
       weatherQuery.refetch();
       forecastQuery.refetch();
       locationQuery.refetch();
+      marineWeatherQuery.refetch();
+      maritimeAlertsQuery.refetch();
+      nearbyShipsQuery.refetch();
     }
   };
 
@@ -95,10 +112,11 @@ export function WeatherDashboard() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <FavoriteCities />
+      
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold tracking-tight">My Location</h1>
+        <h1 className="text-xl font-bold tracking-tight">SmartMarine Weather Navigator</h1>
         <Button
           variant="outline"
           size="icon"
@@ -107,13 +125,19 @@ export function WeatherDashboard() {
         >
           <RefreshCw
             className={`h-4 w-4 ${
-              weatherQuery.isFetching ? "animate-spin" : ""
+              weatherQuery.isFetching || marineWeatherQuery.isFetching ? "animate-spin" : ""
             }`}
           />
         </Button>
       </div>
 
+      {/* Maritime Alerts - Show at top for safety */}
+      {maritimeAlertsQuery.data && (
+        <MaritimeAlerts alerts={maritimeAlertsQuery.data} />
+      )}
+
       <div className="grid gap-6">
+        {/* Current Weather and Marine Conditions */}
         <div className="flex flex-col lg:flex-row gap-4">
           <CurrentWeather
             data={weatherQuery.data}
@@ -122,10 +146,26 @@ export function WeatherDashboard() {
           <HourlyTemperature data={forecastQuery.data} />
         </div>
 
+        {/* Marine Weather Details */}
+        {marineWeatherQuery.data && (
+          <MarineWeatherDetails data={marineWeatherQuery.data} />
+        )}
+
+        {/* Weather Details and Forecast */}
         <div className="grid gap-6 md:grid-cols-2 items-start">
           <WeatherDetails data={weatherQuery.data} />
           <WeatherForecast data={forecastQuery.data} />
         </div>
+
+        {/* Route Optimization */}
+        {coordinates && (
+          <RouteOptimizer currentPosition={coordinates} />
+        )}
+
+        {/* Ship Information */}
+        {nearbyShipsQuery.data && nearbyShipsQuery.data.length > 0 && (
+          <NearbyShips ships={nearbyShipsQuery.data} />
+        )}
       </div>
     </div>
   );
